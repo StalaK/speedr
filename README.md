@@ -1,4 +1,4 @@
-# Speedr - Webpage Word Reader Extension
+# Speedr - Speed Read The Web
 
 Speedr is a Firefox extension designed to enhance your focus and reading speed by displaying webpage text word by word in a customizable overlay.
 
@@ -53,7 +53,3 @@ If you wish to build the extension package (`.zip` file) yourself from the sourc
     *   Navigate to the directory where you have the `speedr.zip` file, and select it.
 
     The Speedr extension should now appear in your list of temporary add-ons and its icon will be visible in your list of extensions.
-
-## License
-
-[Consider adding a license here, e.g., MIT, Apache 2.0, etc.]
