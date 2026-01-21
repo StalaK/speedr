@@ -1,0 +1,122 @@
+body {
+  font-family: Georgia, serif;
+  background-color: #FBF0D9;
+  color: #5B4636;
+  width: 250px;
+  padding: 10px;
+}
+
+body.dark-mode {
+  background-color: #333333;
+  color: #E0E0E0;
+}
+
+h1 {
+  font-size: 1.3em;
+  text-align: center;
+  color: #3D2B1F;
+}
+
+body.dark-mode h1 {
+  color: #E0E0E0;
+}
+
+button {
+  background-color: #D4B996;
+  border: 1px solid #5B4636;
+  color: #3D2B1F;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: Georgia, serif;
+  transition: background-color 0.3s;
+}
+
+body.dark-mode button {
+  background-color: #555555;
+  border: 1px solid #777777;
+  color: #E0E0E0;
+}
+
+button:hover {
+  background-color: #C3A682;
+}
+
+body.dark-mode button:hover {
+  background-color: #666666;
+}
+
+.wpm-container, .focus-mode-container, .dark-mode-container {
+  margin: 15px 0;
+}
+
+#wpm-input {
+  width: 50px;
+  margin-left: 5px;
+  padding: 2px;
+  border: 1px solid #5B4636;
+  border-radius: 3px;
+  background-color: #FBF0D9;
+  color: #5B4636;
+  font-family: inherit;
+  font-size: 1em;
+}
+
+body.dark-mode #wpm-input {
+  background-color: #444444;
+  color: #E0E0E0;
+  border: 1px solid #777777;
+}
+
+.controls-container {
+  display: flex;
+  justify-content: center;
+}
+
+#play-pause-button {
+  width: 50%;
+  font-size: 1.5em;
+  padding: 5px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #D4B996;
+  border-radius: 5px;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity .2s;
+}
+
+body.dark-mode input[type="range"] {
+  background: #555555;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #5B4636;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+body.dark-mode input[type="range"]::-webkit-slider-thumb {
+  background: #999999;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #5B4636;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+body.dark-mode input[type="range"]::-moz-range-thumb {
+  background: #999999;
+}

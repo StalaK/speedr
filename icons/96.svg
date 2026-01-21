@@ -1,0 +1,21 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Plate -->
+  <rect width="96" height="96" rx="20" fill="url(#paint0_linear)"/>
+  
+  <!-- Motion Lines (Speed) -->
+  <path d="M15 35H35M10 48H30M15 61H35" stroke="#3D2B1F" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- The Eye (Vision/Reading) -->
+  <path d="M42 48C42 48 50.5 32 67 32C83.5 32 92 48 92 48C92 48 83.5 64 67 64C50.5 64 42 48 42 48Z" stroke="#3D2B1F" stroke-width="6" stroke-linejoin="round"/>
+  
+  <!-- Focus Point (The ORP Line) -->
+  <circle cx="67" cy="48" r="8" fill="#3D2B1F"/>
+  <circle cx="67" cy="48" r="3" fill="#5A7D9A"/>
+
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4B996"/>
+      <stop offset="1" stop-color="#D4B996"/>
+    </linearGradient>
+  </defs>
+</svg>

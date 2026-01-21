@@ -1,0 +1,64 @@
+{
+  "manifest_version": 2,
+  "name": "Speedr",
+  "version": "1.0",
+  "description": "Lets you speed-read the web",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "storage"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "@speedr",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_icon": "icons/48.svg",
+    "default_title": "Speedr",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "icons": {
+    "48": "icons/48.svg",
+    "96": "icons/96.svg"
+  },
+  "commands": {
+    "read-whole-page": {
+      "suggested_key": {
+        "default": "Alt+R",
+        "mac": "Alt+R"
+      },
+      "description": "Read the whole page"
+    },
+    "read-from-here": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+F",
+        "mac": "Ctrl+Alt+F"
+      },
+      "description": "Read from selection"
+    },
+    "read-to-here": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+T",
+        "mac": "Ctrl+Alt+T"
+      },
+      "description": "Read to selection"
+    }
+  }
+}

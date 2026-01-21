@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Webpage Word Reader</title>
+  <link rel="stylesheet" type="text/css" href="popup.css">
+</head>
+<body>
+  <h1>Speedr</h1>
+  <div class="wpm-container">
+    <label for="wpm-slider">Words Per Minute: <input type="number" id="wpm-input" min="60" max="1200" value="500"></label>
+    <input type="range" id="wpm-slider" min="60" max="1200" value="500">
+  </div>
+  <div class="focus-mode-container">
+    <label>
+      <input type="checkbox" id="focus-mode-checkbox" checked>
+      Focus Mode
+    </label>
+  </div>
+  <div class="dark-mode-container">
+    <label>
+      <input type="checkbox" id="dark-mode-checkbox">
+      Dark Mode
+    </label>
+  </div>
+  <div class="controls-container">
+    <button id="play-pause-button">&#9654;</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
