@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Speedr",
-  "version": "1.0",
-  "description": "Lets you speed-read the web",
+  "version": "1.1",
+  "description": "Speed-read the web!",
   "permissions": [
     "activeTab",
     "contextMenus",
