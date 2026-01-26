@@ -61,7 +61,7 @@ function getFlatTextAndOffsets(rootElement) {
         return;
       }
 
-      // Add newlines for paragraph separation, matching extractTextFromPage
+      // Add newlines for paragraph separation
       const isBlockElement = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(tagName);
       const isLineBreak = tagName === 'br';
 
@@ -75,7 +75,7 @@ function getFlatTextAndOffsets(rootElement) {
         traverse(child);
       }
 
-      // Add extra newline after block elements for consistency with extractTextFromPage's innerText
+      // Add extra newline after block elements
       if (isBlockElement && !flatText.endsWith('\n\n')) {
         flatText += '\n\n';
       }
@@ -371,19 +371,7 @@ function setWpm(wpm) {
   readerState.wpm = wpm;
 }
 
-function extractTextFromPage() {
-  const bodyClone = document.body.cloneNode(true);
 
-  // Remove script and style elements
-  Array.from(bodyClone.querySelectorAll('script, style')).forEach(el => el.remove());
-
-  // Replace block elements with newlines for better paragraph separation
-  Array.from(bodyClone.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, li, br')).forEach(el => {
-    el.insertAdjacentText('afterend', '\n\n');
-  });
-
-  return bodyClone.innerText;
-}
 
 function toggleFocusOverlay(show) {
   if (show) {
