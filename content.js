@@ -546,7 +546,21 @@ function showNextWord() {
   const middleLetter = word.charAt(middleIndex);
   const afterMiddle = word.substring(middleIndex + 1);
 
-  wordDisplay.innerHTML = `${beforeMiddle}<span style="color: #5A7D9A;">${middleLetter}</span>${afterMiddle}`;
+  wordDisplay.textContent = ''; // Clear previous content
+
+  // Create text node for beforeMiddle
+  const beforeSpan = document.createTextNode(beforeMiddle);
+  wordDisplay.appendChild(beforeSpan);
+
+  // Create span for middleLetter
+  const middleSpan = document.createElement('span');
+  middleSpan.style.color = '#5A7D9A';
+  middleSpan.textContent = middleLetter;
+  wordDisplay.appendChild(middleSpan);
+
+  // Create text node for afterMiddle
+  const afterSpan = document.createTextNode(afterMiddle);
+  wordDisplay.appendChild(afterSpan);
   
   if (wordDisplay.scrollWidth > wordDisplay.clientWidth) {
     wordDisplay.classList.add('expanded');
