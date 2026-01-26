@@ -231,7 +231,9 @@ browser.runtime.onMessage.addListener(async (message) => {
     setWpm(message.wpm);
   } else if (message.action === 'toggleFocusMode') {
     readerState.focusMode = message.focusMode;
-    toggleFocusOverlay(readerState.focusMode);
+    if (overlay) { // Only toggle if overlay is active
+        toggleFocusOverlay(readerState.focusMode);
+    }
   } else if (message.action === 'toggleDarkMode') {
     readerState.darkMode = message.darkMode;
     updateOverlayTheme(readerState.darkMode);
