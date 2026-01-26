@@ -2,20 +2,29 @@ const wpmSlider = document.getElementById('wpm-slider');
 const wpmInput = document.getElementById('wpm-input');
 const focusModeCheckbox = document.getElementById('focus-mode-checkbox');
 const darkModeCheckbox = document.getElementById('dark-mode-checkbox');
+const pauseCommaCheckbox = document.getElementById('pause-comma-checkbox');
+const pauseSentenceCheckbox = document.getElementById('pause-sentence-checkbox');
+const pauseParagraphCheckbox = document.getElementById('pause-paragraph-checkbox');
 const playPauseButton = document.getElementById('play-pause-button');
 
 document.addEventListener('DOMContentLoaded', restoreSettings);
 
 async function restoreSettings() {
-  const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode']);
+  const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
   const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
   const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
   const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
+  const storedPauseComma = result.pauseComma === undefined ? false : result.pauseComma; // Default false
+  const storedPauseSentence = result.pauseSentence === undefined ? false : result.pauseSentence; // Default false
+  const storedPauseParagraph = result.pauseParagraph === undefined ? false : result.pauseParagraph; // Default false
 
   wpmSlider.value = storedWpm;
   wpmInput.value = storedWpm;
   focusModeCheckbox.checked = storedFocusMode;
   darkModeCheckbox.checked = storedDarkMode;
+  pauseCommaCheckbox.checked = storedPauseComma;
+  pauseSentenceCheckbox.checked = storedPauseSentence;
+  pauseParagraphCheckbox.checked = storedPauseParagraph;
   
   toggleDarkMode(storedDarkMode);
 }
@@ -52,6 +61,24 @@ darkModeCheckbox.addEventListener('change', () => {
   toggleDarkMode(isChecked);
   sendMessage({ action: 'toggleDarkMode', darkMode: isChecked });
   browser.storage.local.set({ darkMode: isChecked }); // Save Dark Mode
+});
+
+pauseCommaCheckbox.addEventListener('change', () => {
+  const isChecked = pauseCommaCheckbox.checked;
+  sendMessage({ action: 'togglePauseComma', value: isChecked });
+  browser.storage.local.set({ pauseComma: isChecked });
+});
+
+pauseSentenceCheckbox.addEventListener('change', () => {
+  const isChecked = pauseSentenceCheckbox.checked;
+  sendMessage({ action: 'togglePauseSentence', value: isChecked });
+  browser.storage.local.set({ pauseSentence: isChecked });
+});
+
+pauseParagraphCheckbox.addEventListener('change', () => {
+  const isChecked = pauseParagraphCheckbox.checked;
+  sendMessage({ action: 'togglePauseParagraph', value: isChecked });
+  browser.storage.local.set({ pauseParagraph: isChecked });
 });
 
 function toggleDarkMode(isDark) {

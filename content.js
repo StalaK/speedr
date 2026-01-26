@@ -6,6 +6,9 @@ let readerState = {
   timerId: null,
   focusMode: true,
   darkMode: false,
+  pauseComma: false,
+  pauseSentence: false,
+  pauseParagraph: false,
   originalPageText: "",
 };
 
@@ -197,15 +200,24 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+async function getStoredSettings() {
+  const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
+  return {
+    wpm: result.wpm === undefined ? 500 : result.wpm,
+    focusMode: result.focusMode === undefined ? true : result.focusMode,
+    darkMode: result.darkMode === undefined ? false : result.darkMode,
+    pauseComma: result.pauseComma === undefined ? false : result.pauseComma,
+    pauseSentence: result.pauseSentence === undefined ? false : result.pauseSentence,
+    pauseParagraph: result.pauseParagraph === undefined ? false : result.pauseParagraph,
+  };
+}
+
 browser.runtime.onMessage.addListener(async (message) => {
   if (message.action === 'playPause') {
     if (readerState.words.length === 0) {
       // If reader hasn't started, start from the beginning of the page.
-      const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode']);
-      const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
-      const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
-      const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
-      startReaderFromText(readerState.originalPageText, storedFocusMode, storedWpm, storedDarkMode);
+      const settings = await getStoredSettings();
+      startReaderFromText(readerState.originalPageText, settings);
     } else if (readerState.isPlaying) {
       pauseReader();
     } else {
@@ -223,17 +235,20 @@ browser.runtime.onMessage.addListener(async (message) => {
   } else if (message.action === 'toggleDarkMode') {
     readerState.darkMode = message.darkMode;
     updateOverlayTheme(readerState.darkMode);
+  } else if (message.action === 'togglePauseComma') {
+    readerState.pauseComma = message.value;
+  } else if (message.action === 'togglePauseSentence') {
+    readerState.pauseSentence = message.value;
+  } else if (message.action === 'togglePauseParagraph') {
+    readerState.pauseParagraph = message.value;
   } else if (message.action === 'startReadFromSelection') {
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
       const { startIndex, endIndex } = mapSelectionToFlatText(selection, readerState.originalPageText, readerState.originalPageOffsets);
       if (startIndex !== -1) {
-        const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode']);
-        const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
-        const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
-        const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
+        const settings = await getStoredSettings();
         const textToRead = readerState.originalPageText.substring(startIndex);
-        startReaderFromText(textToRead, storedFocusMode, storedWpm, storedDarkMode);
+        startReaderFromText(textToRead, settings);
       }
     }
   } else if (message.action === 'startReadToSelection') {
@@ -241,21 +256,15 @@ browser.runtime.onMessage.addListener(async (message) => {
     if (selection.rangeCount > 0) {
       const { startIndex, endIndex } = mapSelectionToFlatText(selection, readerState.originalPageText, readerState.originalPageOffsets);
       if (endIndex !== -1) {
-        const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode']);
-        const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
-        const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
-        const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
+        const settings = await getStoredSettings();
         const textToRead = readerState.originalPageText.substring(0, endIndex);
-        startReaderFromText(textToRead, storedFocusMode, storedWpm, storedDarkMode);
+        startReaderFromText(textToRead, settings);
       }
     }
   } else if (message.action === 'readWholePage') {
-    const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode']);
-    const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
-    const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
-    const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
+    const settings = await getStoredSettings();
     const textToRead = getSmartPageText();
-    startReaderFromText(textToRead, storedFocusMode, storedWpm, storedDarkMode);
+    startReaderFromText(textToRead, settings);
   }
 });
 
@@ -320,21 +329,25 @@ function extractReadableText(root, isFallback) {
   return flatText.trim();
 }
 
-function startReaderFromText(text, focusMode, wpm, darkMode) { // Added wpm and darkMode parameters
+function startReaderFromText(text, options) {
   if (readerState.isPlaying) {
     // If already playing, stop current reading first
     pauseReader();
   }
 
-  readerState.focusMode = focusMode;
-  readerState.wpm = wpm; // Set readerState.wpm
-  readerState.darkMode = darkMode;
+  readerState.focusMode = options.focusMode;
+  readerState.wpm = options.wpm;
+  readerState.darkMode = options.darkMode;
+  readerState.pauseComma = options.pauseComma;
+  readerState.pauseSentence = options.pauseSentence;
+  readerState.pauseParagraph = options.pauseParagraph;
+
   readerState.words = text.replace(/(\r\n|\n|\r){2,}/gm, " _PARAGRAPH_END_ ").split(/\s+/).filter(word => word.length > 0);
   readerState.currentIndex = 0;
 
   if (overlay) {
     // If overlay already exists, clear its content
-    wordDisplay.innerHTML = '';
+    wordDisplay.textContent = ''; // Clear previous content
     overlay.style.display = 'flex'; // Ensure overlay is visible
     if (readerState.focusMode) {
       toggleFocusOverlay(true);
@@ -530,7 +543,10 @@ function showNextWord() {
 
   if (word === '_PARAGRAPH_END_') {
     readerState.currentIndex++;
-    const delay = (60000 / readerState.wpm) * 1.5; // 1.5x delay for paragraph
+    let delay = 60000 / readerState.wpm;
+    if (readerState.pauseParagraph) {
+      delay *= 1.75; // 1.75x delay for paragraph
+    }
     readerState.timerId = setTimeout(showNextWord, delay);
     return;
   }
@@ -575,10 +591,10 @@ function showNextWord() {
   readerState.currentIndex++;
 
   let delay = 60000 / readerState.wpm;
-  if (word.endsWith('.') || word.endsWith('!') || word.endsWith('?')) {
-    delay *= 1.25; // 25% longer for sentence end
-  } else if (word.endsWith(',')) {
-    delay *= 1.2; // 20% longer for comma
+  if (readerState.pauseSentence && (word.endsWith('.') || word.endsWith('!') || word.endsWith('?'))) {
+    delay *= 1.5; // 50% longer for sentence end
+  } else if (readerState.pauseComma && word.endsWith(',')) {
+    delay *= 1.5; // 50% longer for comma
   }
 
   readerState.timerId = setTimeout(showNextWord, delay);

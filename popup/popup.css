@@ -47,7 +47,7 @@ body.dark-mode button:hover {
   background-color: #666666;
 }
 
-.wpm-container, .focus-mode-container, .dark-mode-container {
+.wpm-container, .focus-mode-container, .dark-mode-container, .pause-settings-container {
   margin: 15px 0;
 }
 
