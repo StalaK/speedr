@@ -21,30 +21,29 @@ body.dark-mode h1 {
   color: #E0E0E0;
 }
 
-button {
-  background-color: #D4B996;
-  border: 1px solid #5B4636;
+h2 {
+  font-size: 1.1em;
   color: #3D2B1F;
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 3px;
-  cursor: pointer;
-  font-family: Georgia, serif;
-  transition: background-color 0.3s;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #D4B996;
+  padding-bottom: 5px;
 }
 
-body.dark-mode button {
-  background-color: #555555;
-  border: 1px solid #777777;
+body.dark-mode h2 {
   color: #E0E0E0;
+  border-bottom: 1px solid #555555;
 }
 
-button:hover {
-  background-color: #C3A682;
+.reading-options-group, .user-interface-group {
+  margin-bottom: 20px;
+  padding: 5px;
+  border: 1px solid #D4B996;
+  border-radius: 5px;
 }
 
-body.dark-mode button:hover {
-  background-color: #666666;
+body.dark-mode .reading-options-group, body.dark-mode .user-interface-group {
+  border: 1px solid #555555;
 }
 
 .wpm-container, .focus-mode-container, .dark-mode-container, .pause-settings-container {

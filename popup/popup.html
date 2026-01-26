@@ -6,26 +6,33 @@
 </head>
 <body>
   <h1>Speedr</h1>
-  <div class="wpm-container">
-    <label for="wpm-slider">Words Per Minute: <input type="number" id="wpm-input" min="60" max="1200" value="500"></label>
-    <input type="range" id="wpm-slider" min="60" max="1200" value="500">
+  <h2>Reading Options</h2>
+  <div class="reading-options-group">
+    <div class="wpm-container">
+      <label for="wpm-slider">Words Per Minute: <input type="number" id="wpm-input" min="60" max="1200" value="500"></label>
+      <input type="range" id="wpm-slider" min="60" max="1200" value="500">
+    </div>
+    <div class="pause-settings-container">
+      <label><input type="checkbox" id="pause-comma-checkbox"> Pause on Comma</label><br>
+      <label><input type="checkbox" id="pause-sentence-checkbox"> Pause on Sentence</label><br>
+      <label><input type="checkbox" id="pause-paragraph-checkbox"> Pause on Paragraph</label>
+    </div>
   </div>
-  <div class="focus-mode-container">
-    <label>
-      <input type="checkbox" id="focus-mode-checkbox" checked>
-      Focus Mode
-    </label>
-  </div>
-  <div class="dark-mode-container">
-    <label>
-      <input type="checkbox" id="dark-mode-checkbox">
-      Dark Mode
-    </label>
-  </div>
-  <div class="pause-settings-container">
-    <label><input type="checkbox" id="pause-comma-checkbox"> Pause on Comma</label><br>
-    <label><input type="checkbox" id="pause-sentence-checkbox"> Pause on Sentence</label><br>
-    <label><input type="checkbox" id="pause-paragraph-checkbox"> Pause on Paragraph</label>
+
+  <h2>User Interface</h2>
+  <div class="user-interface-group">
+    <div class="focus-mode-container">
+      <label>
+        <input type="checkbox" id="focus-mode-checkbox" checked>
+        Focus Mode
+      </label>
+    </div>
+    <div class="dark-mode-container">
+      <label>
+        <input type="checkbox" id="dark-mode-checkbox">
+        Dark Mode
+      </label>
+    </div>
   </div>
   <div class="controls-container">
     <button id="play-pause-button">&#9654;</button>
