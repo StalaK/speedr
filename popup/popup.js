@@ -106,3 +106,76 @@ browser.runtime.onMessage.addListener((message) => {
     }
   }
 });
+
+// Tooltip logic
+const tooltipIcons = document.querySelectorAll('.tooltip-icon');
+
+// Create single tooltip instance
+const tooltip = document.createElement('div');
+tooltip.className = 'custom-tooltip';
+const arrow = document.createElement('div');
+arrow.className = 'tooltip-arrow';
+tooltip.appendChild(arrow);
+document.body.appendChild(tooltip);
+
+tooltipIcons.forEach(icon => {
+  let tooltipTimeout;
+  const tooltipText = icon.getAttribute('data-tooltip');
+  
+  if (tooltipText) {
+    icon.addEventListener('mouseenter', () => {
+      tooltipTimeout = setTimeout(() => {
+          tooltip.childNodes[0].nodeValue = tooltipText; // Update text safely
+          if (tooltip.firstChild.nodeType !== Node.TEXT_NODE) {
+             tooltip.prepend(document.createTextNode(tooltipText));
+          } else {
+             tooltip.firstChild.nodeValue = tooltipText;
+          }
+
+          const iconRect = icon.getBoundingClientRect();
+          const tooltipWidth = 200; // Defined in CSS
+          const bodyWidth = document.body.clientWidth;
+          
+          // Calculate Left (Clamp to window bounds)
+          let left = iconRect.left + iconRect.width / 2 - tooltipWidth / 2;
+          // Padding of 10px from edges
+          if (left < 10) left = 10;
+          if (left + tooltipWidth > bodyWidth - 10) left = bodyWidth - 10 - tooltipWidth;
+          
+          tooltip.style.left = left + 'px';
+          
+          // Calculate Top (Above icon)
+          // We need to render it to get height if it's dynamic, but here it's mostly text.
+          // Let's assume it's roughly positioned, or use visibility to measure.
+          tooltip.style.visibility = 'hidden'; 
+          tooltip.style.opacity = '0';
+          // Force layout update? 
+          // Actually, since it's fixed, we can just set top after a brief moment or calculate assuming height?
+          // Safer to show it hidden, measure, then set top.
+          
+          // Temporarily show to measure height
+          tooltip.style.display = 'block'; 
+          const tooltipHeight = tooltip.offsetHeight;
+          
+          let top = iconRect.top - tooltipHeight - 8; 
+          tooltip.style.top = top + 'px';
+
+          // Calculate Arrow Position (Relative to tooltip)
+          const iconCenter = iconRect.left + iconRect.width / 2;
+          // Arrow center should be at iconCenter
+          // arrowLeft + 5 (half border) = iconCenter - tooltipLeft
+          const arrowLeft = iconCenter - left - 5;
+          arrow.style.left = arrowLeft + 'px';
+
+          tooltip.style.visibility = 'visible';
+          tooltip.style.opacity = '1';
+      }, 200); // 200ms delay
+    });
+
+    icon.addEventListener('mouseleave', () => {
+      clearTimeout(tooltipTimeout);
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.opacity = '0';
+    });
+  }
+});
