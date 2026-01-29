@@ -18,7 +18,8 @@ let focusOverlay = null;
 let progressBar = null;
 
 // Initialize originalPageText and originalPageOffsets as soon as the content script loads
-const { flatText, nodeOffsetMap } = getFlatTextAndOffsets(document.body);
+const { root: smartRoot, isFallback } = getReadableRootElement();
+const { flatText, nodeOffsetMap } = getFilteredTextAndOffsets(smartRoot, isFallback);
 readerState.originalPageText = flatText;
 readerState.originalPageOffsets = nodeOffsetMap;
 
@@ -43,8 +44,8 @@ function stopReaderAndCleanUp() {
   chrome.runtime.sendMessage({ action: 'stateUpdate', isPlaying: false });
 }
 
-// Helper to get flat text and offsets
-function getFlatTextAndOffsets(rootElement) {
+// Helper to get filtered text and offsets
+function getFilteredTextAndOffsets(rootElement, isFallback) {
   let flatText = '';
   const nodeOffsetMap = new Map(); // Maps node to {start, end} offset in flatText
 
@@ -59,13 +60,13 @@ function getFlatTextAndOffsets(rootElement) {
       if (!isVisible(node)) return;
 
       const tagName = node.tagName.toLowerCase();
-      // Skip script and style elements
-      if (tagName === 'script' || tagName === 'style') {
-        return;
-      }
+      // Always ignore these
+      if (['script', 'style', 'noscript', 'nav', 'aside', 'iframe', 'svg'].includes(tagName)) return;
+      
+      // If we are falling back to body, also ignore header/footer
+      if (isFallback && ['header', 'footer'].includes(tagName)) return;
 
-      // Add newlines for paragraph separation
-      const isBlockElement = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(tagName);
+      const isBlockElement = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'article', 'section', 'main'].includes(tagName);
       const isLineBreak = tagName === 'br';
 
       if (isBlockElement && flatText.length > 0 && !flatText.endsWith('\n\n')) {
@@ -78,7 +79,6 @@ function getFlatTextAndOffsets(rootElement) {
         traverse(child);
       }
 
-      // Add extra newline after block elements
       if (isBlockElement && !flatText.endsWith('\n\n')) {
         flatText += '\n\n';
       }
@@ -270,7 +270,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 });
 
-function getSmartPageText() {
+function getReadableRootElement() {
   const selectors = ['article', 'main', '[role="main"]', '.post-content', '#content', '#main-content', '.entry-content'];
   let root = document.body;
   let isFallback = true;
@@ -284,52 +284,15 @@ function getSmartPageText() {
       break;
     }
   }
-
-  return extractReadableText(root, isFallback);
+  return { root, isFallback };
 }
 
-function extractReadableText(root, isFallback) {
-  let flatText = '';
-  
-  function traverse(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const trimmed = node.textContent.trim();
-      if (trimmed.length > 0) {
-        flatText += node.textContent;
-      }
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      // Check visibility
-      if (!isVisible(node)) return;
-
-      const tagName = node.tagName.toLowerCase();
-      // Always ignore these
-      if (['script', 'style', 'noscript', 'nav', 'aside', 'iframe', 'svg'].includes(tagName)) return;
-      
-      // If we are falling back to body, also ignore header/footer
-      if (isFallback && ['header', 'footer'].includes(tagName)) return;
-
-      const isBlockElement = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'article', 'section', 'main'].includes(tagName);
-      const isLineBreak = tagName === 'br';
-
-      if (isBlockElement && flatText.length > 0 && !flatText.endsWith('\n\n')) {
-        flatText += '\n\n';
-      } else if (isLineBreak && flatText.length > 0 && !flatText.endsWith('\n')) {
-        flatText += '\n';
-      }
-
-      for (const child of node.childNodes) {
-        traverse(child);
-      }
-
-      if (isBlockElement && !flatText.endsWith('\n\n')) {
-        flatText += '\n\n';
-      }
-    }
-  }
-
-  traverse(root);
-  return flatText.trim();
+function getSmartPageText() {
+  const { root, isFallback } = getReadableRootElement();
+  const { flatText } = getFilteredTextAndOffsets(root, isFallback);
+  return flatText;
 }
+
 
 function startReaderFromText(text, options) {
   if (readerState.isPlaying) {
