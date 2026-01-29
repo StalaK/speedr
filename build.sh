@@ -13,18 +13,28 @@ rm -f speedr-chrome.zip speedr-firefox.zip
 mkdir -p "$CHROME_DIR"
 mkdir -p "$FIREFOX_DIR"
 
-# Files to copy (common files)
-# We can use rsync or cp. strict cp is safer for basic shell.
-# Copying folders: icons, popup
-cp -r icons "$CHROME_DIR/"
+# Copy shared files (popup, background, content)
 cp -r popup "$CHROME_DIR/"
 cp background.js "$CHROME_DIR/"
 cp content.js "$CHROME_DIR/"
 
-cp -r icons "$FIREFOX_DIR/"
 cp -r popup "$FIREFOX_DIR/"
 cp background.js "$FIREFOX_DIR/"
 cp content.js "$FIREFOX_DIR/"
+
+# Copy Chrome-specific icons (PNGs for manifest, SVGs for popup)
+mkdir -p "$CHROME_DIR/icons"
+cp icons/48.png "$CHROME_DIR/icons/"
+cp icons/96.png "$CHROME_DIR/icons/"
+cp icons/150-light.svg "$CHROME_DIR/icons/"
+cp icons/150-dark.svg "$CHROME_DIR/icons/"
+
+# Copy Firefox-specific icons (SVGs for everything)
+mkdir -p "$FIREFOX_DIR/icons"
+cp icons/48.svg "$FIREFOX_DIR/icons/"
+cp icons/96.svg "$FIREFOX_DIR/icons/"
+cp icons/150-light.svg "$FIREFOX_DIR/icons/"
+cp icons/150-dark.svg "$FIREFOX_DIR/icons/"
 
 # Copy specific manifests
 cp manifest-chrome.json "$CHROME_DIR/manifest.json"
