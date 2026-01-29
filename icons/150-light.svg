@@ -1,0 +1,11 @@
+<svg width="150" height="150" viewBox="-10 -10 116 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Motion Lines (Speed) -->
+  <path d="M15 35H35M10 48H30M15 61H35" stroke="#3D2B1F" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- The Eye (Vision/Reading) -->
+  <path d="M42 48C42 48 50.5 32 67 32C83.5 32 92 48 92 48C92 48 83.5 64 67 64C50.5 64 42 48 42 48Z" stroke="#3D2B1F" stroke-width="6" stroke-linejoin="round"/>
+  
+  <!-- Focus Point -->
+  <circle cx="67" cy="48" r="8" fill="#3D2B1F"/>
+  <circle cx="67" cy="48" r="3" fill="#5A7D9A"/>
+</svg>

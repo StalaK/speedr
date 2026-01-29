@@ -82,10 +82,13 @@ pauseParagraphCheckbox.addEventListener('change', () => {
 });
 
 function toggleDarkMode(isDark) {
+  const logo = document.querySelector('.header-logo');
   if (isDark) {
     document.body.classList.add('dark-mode');
+    if (logo) logo.src = '../icons/150-dark.svg';
   } else {
     document.body.classList.remove('dark-mode');
+    if (logo) logo.src = '../icons/150-light.svg';
   }
 }
 
