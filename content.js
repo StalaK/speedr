@@ -344,7 +344,7 @@ function startReaderFromText(text, options) {
   readerState.pauseSentence = options.pauseSentence;
   readerState.pauseParagraph = options.pauseParagraph;
 
-  readerState.words = text.replace(/(\r\n|\n|\r){2,}/gm, " _PARAGRAPH_END_ ").split(/\s+/).filter(word => word.length > 0);
+  readerState.words = text.replace(/\//g, ' / ').replace(/(\r\n|\n|\r){2,}/gm, " _PARAGRAPH_END_ ").split(/\s+/).filter(word => word.length > 0);
   readerState.currentIndex = 0;
 
   if (overlay) {
