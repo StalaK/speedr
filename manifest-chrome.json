@@ -15,7 +15,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_icon": "icons/48.svg",
+    "default_icon": "icons/48.png",
     "default_title": "Speedr",
     "default_popup": "popup/popup.html"
   },
@@ -30,8 +30,8 @@
     }
   ],
   "icons": {
-    "48": "icons/48.svg",
-    "96": "icons/96.svg"
+    "48": "icons/48.png",
+    "96": "icons/96.png"
   },
   "commands": {
     "read-whole-page": {
