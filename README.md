@@ -41,23 +41,29 @@ The following keyboard shortcuts are built into Speedr and cannot be customised.
 
 ## Building from Source
 
-If you wish to build the extension package (`.zip` file) yourself from the source code:
+To build the extension for both Chrome and Firefox:
 
-1.  **Navigate to the project root:**
+1.  **Run the build script:**
     ```bash
-    cd /path/to/your/project/directory
+    ./build.sh
     ```
-2.  **Create the zip package:**
-    ```bash
-    zip -r speedr.zip . -x "*.git/*"
-    ```
-    This command will create `speedr.zip` containing all necessary files, excluding the `.git` directory.
+    This will create two files in the project root:
+    *   `speedr-chrome.zip`
+    *   `speedr-firefox.zip`
 
-3.  **Load in Firefox:**
-    *   Open your Firefox browser.
-    *   Type `about:debugging` in the address bar and press Enter.
-    *   In the `about:debugging` page, click on **"This Firefox"** from the left-hand menu.
-    *   Click the **"Load Temporary Add-on..."** button.
-    *   Navigate to the directory where you have the `speedr.zip` file, and select it.
+## Installation
 
-    The Speedr extension should now appear in your list of temporary add-ons and its icon will be visible in your list of extensions.
+### Firefox
+
+1.  Open Firefox and type `about:debugging` in the address bar.
+2.  Click on **"This Firefox"** in the left sidebar.
+3.  Click **"Load Temporary Add-on..."**.
+4.  Select the `speedr-firefox.zip` file.
+
+### Chrome
+
+1.  Unzip `speedr-chrome.zip` into a folder (e.g., `speedr-chrome`).
+2.  Open Chrome and navigate to `chrome://extensions`.
+3.  Enable **"Developer mode"** in the top right corner.
+4.  Click **"Load unpacked"**.
+5.  Select the folder where you unzipped the extension.
