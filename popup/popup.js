@@ -10,7 +10,7 @@ const playPauseButton = document.getElementById('play-pause-button');
 document.addEventListener('DOMContentLoaded', restoreSettings);
 
 async function restoreSettings() {
-  const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
+  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
   const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
   const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
   const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
@@ -37,7 +37,7 @@ wpmSlider.addEventListener('input', () => {
   const wpm = wpmSlider.value;
   wpmInput.value = wpm;
   sendMessage({ action: 'setWpm', wpm: parseInt(wpm, 10) });
-  browser.storage.local.set({ wpm: parseInt(wpm, 10) }); // Save WPM
+  chrome.storage.local.set({ wpm: parseInt(wpm, 10) }); // Save WPM
 });
 
 wpmInput.addEventListener('input', () => {
@@ -46,39 +46,39 @@ wpmInput.addEventListener('input', () => {
     wpmSlider.value = wpm;
     sendMessage({ action: 'setWpm', wpm: wpm });
     sendMessage({ action: 'pause' });
-    browser.storage.local.set({ wpm: wpm }); // Save WPM
+    chrome.storage.local.set({ wpm: wpm }); // Save WPM
   }
 });
 
 focusModeCheckbox.addEventListener('change', () => {
   const isChecked = focusModeCheckbox.checked;
   sendMessage({ action: 'toggleFocusMode', focusMode: isChecked });
-  browser.storage.local.set({ focusMode: isChecked }); // Save Focus Mode
+  chrome.storage.local.set({ focusMode: isChecked }); // Save Focus Mode
 });
 
 darkModeCheckbox.addEventListener('change', () => {
   const isChecked = darkModeCheckbox.checked;
   toggleDarkMode(isChecked);
   sendMessage({ action: 'toggleDarkMode', darkMode: isChecked });
-  browser.storage.local.set({ darkMode: isChecked }); // Save Dark Mode
+  chrome.storage.local.set({ darkMode: isChecked }); // Save Dark Mode
 });
 
 pauseCommaCheckbox.addEventListener('change', () => {
   const isChecked = pauseCommaCheckbox.checked;
   sendMessage({ action: 'togglePauseComma', value: isChecked });
-  browser.storage.local.set({ pauseComma: isChecked });
+  chrome.storage.local.set({ pauseComma: isChecked });
 });
 
 pauseSentenceCheckbox.addEventListener('change', () => {
   const isChecked = pauseSentenceCheckbox.checked;
   sendMessage({ action: 'togglePauseSentence', value: isChecked });
-  browser.storage.local.set({ pauseSentence: isChecked });
+  chrome.storage.local.set({ pauseSentence: isChecked });
 });
 
 pauseParagraphCheckbox.addEventListener('change', () => {
   const isChecked = pauseParagraphCheckbox.checked;
   sendMessage({ action: 'togglePauseParagraph', value: isChecked });
-  browser.storage.local.set({ pauseParagraph: isChecked });
+  chrome.storage.local.set({ pauseParagraph: isChecked });
 });
 
 function toggleDarkMode(isDark) {
@@ -93,14 +93,14 @@ function toggleDarkMode(isDark) {
 }
 
 function sendMessage(message) {
-  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs.length > 0) {
-      browser.tabs.sendMessage(tabs[0].id, message);
+      chrome.tabs.sendMessage(tabs[0].id, message);
     }
   });
 }
 
-browser.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message) => {
   if (message.action === 'stateUpdate') {
     if (message.isPlaying) {
       playPauseButton.innerHTML = '&#9208;';

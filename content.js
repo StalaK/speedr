@@ -40,7 +40,7 @@ function stopReaderAndCleanUp() {
   readerState.currentIndex = 0;
 
   // Send update to popup to show play icon
-  browser.runtime.sendMessage({ action: 'stateUpdate', isPlaying: false });
+  chrome.runtime.sendMessage({ action: 'stateUpdate', isPlaying: false });
 }
 
 // Helper to get flat text and offsets
@@ -201,7 +201,7 @@ document.addEventListener('keydown', (event) => {
 });
 
 async function getStoredSettings() {
-  const result = await browser.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
+  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
   return {
     wpm: result.wpm === undefined ? 500 : result.wpm,
     focusMode: result.focusMode === undefined ? true : result.focusMode,
@@ -212,7 +212,7 @@ async function getStoredSettings() {
   };
 }
 
-browser.runtime.onMessage.addListener(async (message) => {
+chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === 'playPause') {
     if (readerState.words.length === 0) {
       // If reader hasn't started, start from the beginning of the page.
@@ -361,7 +361,7 @@ function startReaderFromText(text, options) {
   }
 
   readerState.isPlaying = true;
-  browser.runtime.sendMessage({ action: 'stateUpdate', isPlaying: readerState.isPlaying });
+  chrome.runtime.sendMessage({ action: 'stateUpdate', isPlaying: readerState.isPlaying });
   showNextWord();
 }
 
@@ -370,7 +370,7 @@ function pauseReader() {
   if (readerState.timerId) {
     clearTimeout(readerState.timerId);
   }
-  browser.runtime.sendMessage({ action: 'stateUpdate', isPlaying: readerState.isPlaying });
+  chrome.runtime.sendMessage({ action: 'stateUpdate', isPlaying: readerState.isPlaying });
 }
 
 function resumeReader() {
@@ -378,7 +378,7 @@ function resumeReader() {
     return;
   }
   readerState.isPlaying = true;
-  browser.runtime.sendMessage({ action: 'stateUpdate', isPlaying: readerState.isPlaying });
+  chrome.runtime.sendMessage({ action: 'stateUpdate', isPlaying: readerState.isPlaying });
   showNextWord();
 }
 
