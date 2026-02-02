@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Speedr",
+  "name": "Speedr: The Web Speed Reader",
   "version": "1.2",
   "description": "Speed-read the web!",
   "permissions": [
