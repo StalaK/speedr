@@ -13,7 +13,7 @@ chrome.contextMenus.create({
 chrome.contextMenus.create({
   id: "read-whole-page",
   title: "Read whole page",
-  contexts: ["page"], // Available on any part of the page, not just selection
+  contexts: ["page", "selection"], // Available on any part of the page, not just selection
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
