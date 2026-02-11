@@ -9,24 +9,25 @@ const playPauseButton = document.getElementById('play-pause-button');
 
 document.addEventListener('DOMContentLoaded', restoreSettings);
 
-async function restoreSettings() {
-  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
-  const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
-  const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
-  const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
-  const storedPauseComma = result.pauseComma === undefined ? false : result.pauseComma; // Default false
-  const storedPauseSentence = result.pauseSentence === undefined ? false : result.pauseSentence; // Default false
-  const storedPauseParagraph = result.pauseParagraph === undefined ? false : result.pauseParagraph; // Default false
+function restoreSettings() {
+  chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph'], (result) => {
+    const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
+    const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
+    const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
+    const storedPauseComma = result.pauseComma === undefined ? false : result.pauseComma; // Default false
+    const storedPauseSentence = result.pauseSentence === undefined ? false : result.pauseSentence; // Default false
+    const storedPauseParagraph = result.pauseParagraph === undefined ? false : result.pauseParagraph; // Default false
 
-  wpmSlider.value = storedWpm;
-  wpmInput.value = storedWpm;
-  focusModeCheckbox.checked = storedFocusMode;
-  darkModeCheckbox.checked = storedDarkMode;
-  pauseCommaCheckbox.checked = storedPauseComma;
-  pauseSentenceCheckbox.checked = storedPauseSentence;
-  pauseParagraphCheckbox.checked = storedPauseParagraph;
-  
-  toggleDarkMode(storedDarkMode);
+    wpmSlider.value = storedWpm;
+    wpmInput.value = storedWpm;
+    focusModeCheckbox.checked = storedFocusMode;
+    darkModeCheckbox.checked = storedDarkMode;
+    pauseCommaCheckbox.checked = storedPauseComma;
+    pauseSentenceCheckbox.checked = storedPauseSentence;
+    pauseParagraphCheckbox.checked = storedPauseParagraph;
+    
+    toggleDarkMode(storedDarkMode);
+  });
 }
 
 playPauseButton.addEventListener('click', () => {
