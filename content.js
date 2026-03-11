@@ -448,7 +448,7 @@ function createOverlay() {
       font-family: 'Courier New', monospace;
       font-size: 3em;
       margin-bottom: 10px;
-      width: 400px;
+      width: 800px;
       height: 100px;
       display: flex;
       justify-content: center;
