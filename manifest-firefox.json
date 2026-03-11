@@ -59,6 +59,13 @@
         "mac": "Ctrl+Alt+T"
       },
       "description": "Read to selection"
+    },
+    "read-selection": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+S",
+        "mac": "Ctrl+Alt+S"
+      },
+      "description": "Read selection"
     }
   }
 }

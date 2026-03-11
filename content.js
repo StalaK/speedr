@@ -268,6 +268,26 @@ chrome.runtime.onMessage.addListener(async (message) => {
         startReaderFromText(textToRead, settings);
       }
     }
+  } else if (message.action === 'readSelection') {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const { startIndex, endIndex } = mapSelectionToFlatText(selection, readerState.originalPageText, readerState.originalPageOffsets);
+      if (startIndex !== -1 && endIndex !== -1) {
+        // Expand to word boundaries
+        let expandedStart = startIndex;
+        while (expandedStart > 0 && !/\s/.test(readerState.originalPageText[expandedStart - 1])) {
+          expandedStart--;
+        }
+        let expandedEnd = endIndex;
+        while (expandedEnd < readerState.originalPageText.length && !/\s/.test(readerState.originalPageText[expandedEnd])) {
+          expandedEnd++;
+        }
+        
+        const settings = await getStoredSettings();
+        const textToRead = readerState.originalPageText.substring(expandedStart, expandedEnd);
+        startReaderFromText(textToRead, settings);
+      }
+    }
   } else if (message.action === 'readWholePage') {
     const settings = await getStoredSettings();
     const textToRead = getSmartPageText();

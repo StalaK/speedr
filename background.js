@@ -11,6 +11,12 @@ chrome.contextMenus.create({
 });
 
 chrome.contextMenus.create({
+  id: "read-selection",
+  title: "Read selection",
+  contexts: ["selection"],
+});
+
+chrome.contextMenus.create({
   id: "read-whole-page",
   title: "Read whole page",
   contexts: ["page", "selection"], // Available on any part of the page, not just selection
@@ -24,6 +30,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   } else if (info.menuItemId === "read-to-here") {
     chrome.tabs.sendMessage(tab.id, {
       action: "startReadToSelection",
+    });
+  } else if (info.menuItemId === "read-selection") {
+    chrome.tabs.sendMessage(tab.id, {
+      action: "readSelection",
     });
   } else if (info.menuItemId === "read-whole-page") {
     chrome.tabs.sendMessage(tab.id, {
@@ -54,6 +64,14 @@ chrome.commands.onCommand.addListener((command) => {
       if (tabs.length > 0) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "startReadToSelection",
+        });
+      }
+    });
+  } else if (command === "read-selection") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length > 0) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "readSelection",
         });
       }
     });

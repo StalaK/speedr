@@ -54,6 +54,13 @@
         "mac": "Command+Shift+T"
       },
       "description": "Read to selection"
+    },
+    "read-selection": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Read selection"
     }
   }
 }
