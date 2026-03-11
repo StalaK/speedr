@@ -4,6 +4,7 @@ const focusModeCheckbox = document.getElementById('focus-mode-checkbox');
 const darkModeCheckbox = document.getElementById('dark-mode-checkbox');
 const webpageFontCheckbox = document.getElementById('webpage-font-checkbox');
 const scrollWithTextCheckbox = document.getElementById('scroll-with-text-checkbox');
+const inlineResumeIconCheckbox = document.getElementById('inline-resume-icon-checkbox');
 const pauseCommaCheckbox = document.getElementById('pause-comma-checkbox');
 const pauseSentenceCheckbox = document.getElementById('pause-sentence-checkbox');
 const pauseParagraphCheckbox = document.getElementById('pause-paragraph-checkbox');
@@ -12,12 +13,13 @@ const playPauseButton = document.getElementById('play-pause-button');
 document.addEventListener('DOMContentLoaded', restoreSettings);
 
 function restoreSettings() {
-  chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'scrollWithText', 'pauseComma', 'pauseSentence', 'pauseParagraph'], (result) => {
+  chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'scrollWithText', 'inlineResumeIcon', 'pauseComma', 'pauseSentence', 'pauseParagraph'], (result) => {
     const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
     const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
     const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
     const storedUseWebpageFont = result.useWebpageFont === undefined ? false : result.useWebpageFont; // Default false
     const storedScrollWithText = result.scrollWithText === undefined ? false : result.scrollWithText; // Default false
+    const storedInlineResumeIcon = result.inlineResumeIcon === undefined ? false : result.inlineResumeIcon; // Default false
     const storedPauseComma = result.pauseComma === undefined ? false : result.pauseComma; // Default false
     const storedPauseSentence = result.pauseSentence === undefined ? false : result.pauseSentence; // Default false
     const storedPauseParagraph = result.pauseParagraph === undefined ? false : result.pauseParagraph; // Default false
@@ -28,6 +30,7 @@ function restoreSettings() {
     darkModeCheckbox.checked = storedDarkMode;
     webpageFontCheckbox.checked = storedUseWebpageFont;
     scrollWithTextCheckbox.checked = storedScrollWithText;
+    inlineResumeIconCheckbox.checked = storedInlineResumeIcon;
     pauseCommaCheckbox.checked = storedPauseComma;
     pauseSentenceCheckbox.checked = storedPauseSentence;
     pauseParagraphCheckbox.checked = storedPauseParagraph;
@@ -80,6 +83,12 @@ scrollWithTextCheckbox.addEventListener('change', () => {
   const isChecked = scrollWithTextCheckbox.checked;
   sendMessage({ action: 'toggleScrollWithText', scrollWithText: isChecked });
   chrome.storage.local.set({ scrollWithText: isChecked }); // Save Scroll With Text
+});
+
+inlineResumeIconCheckbox.addEventListener('change', () => {
+  const isChecked = inlineResumeIconCheckbox.checked;
+  sendMessage({ action: 'toggleInlineResumeIcon', inlineResumeIcon: isChecked });
+  chrome.storage.local.set({ inlineResumeIcon: isChecked }); // Save Inline Resume Icon
 });
 
 pauseCommaCheckbox.addEventListener('change', () => {

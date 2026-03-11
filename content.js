@@ -8,6 +8,7 @@ let readerState = {
   darkMode: false,
   useWebpageFont: false,
   scrollWithText: false,
+  inlineResumeIcon: false,
   pauseComma: false,
   pauseSentence: false,
   pauseParagraph: false,
@@ -43,6 +44,15 @@ const { flatText, nodeOffsetMap } = getFilteredTextAndOffsets(smartRoot, isFallb
 readerState.originalPageText = flatText;
 readerState.originalPageOffsets = nodeOffsetMap;
 
+function removeResumeIcons() {
+  const existingIcons = document.querySelectorAll('.speedr-resume-icon');
+  existingIcons.forEach(icon => {
+    const p = icon.parentNode;
+    icon.remove();
+    if (p) p.normalize();
+  });
+}
+
 // Function to stop reader and clean up overlays
 function stopReaderAndCleanUp() {
   if (overlay) {
@@ -57,10 +67,60 @@ function stopReaderAndCleanUp() {
   pauseReader(); // Also clears timer and sets isPlaying to false
 
   // Reset reader state
+  const currentIndex = readerState.currentIndex;
+  const totalWords = readerState.words.length;
+  const currentWordObj = readerState.words[currentIndex];
+  const inlineResumeIcon = readerState.inlineResumeIcon;
+
   readerState.words = [];
   readerState.currentIndex = 0;
   targetScrollY = null;
   isSmoothScrolling = false;
+
+  removeResumeIcons();
+
+  if (inlineResumeIcon && currentIndex > 0 && currentIndex < totalWords && currentWordObj) {
+    const globalOffset = typeof currentWordObj === 'object' ? currentWordObj.globalOffset : -1;
+    if (globalOffset !== -1) {
+      for (const [node, {start, end}] of readerState.originalPageOffsets.entries()) {
+        if (globalOffset >= start && globalOffset < end) {
+          try {
+            const range = document.createRange();
+            const nodeOffset = globalOffset - start;
+            range.setStart(node, nodeOffset);
+            range.setEnd(node, nodeOffset);
+            
+            const icon = document.createElement('span');
+            icon.className = 'speedr-resume-icon';
+            icon.textContent = '▶';
+            icon.title = 'Resume Speedr from here';
+            icon.style.cssText = 'color: #D4B996; background: #5B4636; border-radius: 3px; padding: 0 4px; margin: 0 2px; cursor: pointer; font-size: 0.9em; box-shadow: 0 1px 3px rgba(0,0,0,0.3);';
+            if (readerState.darkMode) {
+              icon.style.color = '#5B4636';
+              icon.style.background = '#D4B996';
+            }
+            
+            const parent = node.parentNode;
+            
+            icon.addEventListener('click', async (e) => {
+               e.preventDefault();
+               e.stopPropagation();
+               icon.remove();
+               if (parent) parent.normalize();
+               const settings = await getStoredSettings();
+               const textToRead = readerState.originalPageText.substring(globalOffset);
+               startReaderFromText(textToRead, settings, globalOffset);
+            });
+            
+            range.insertNode(icon);
+          } catch (e) {
+             console.error("Speedr inline icon error:", e);
+          }
+          break;
+        }
+      }
+    }
+  }
 
   // Send update to popup to show play icon
   chrome.runtime.sendMessage({ action: 'stateUpdate', isPlaying: false });
@@ -223,13 +283,14 @@ document.addEventListener('keydown', (event) => {
 });
 
 async function getStoredSettings() {
-  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'scrollWithText', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
+  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'scrollWithText', 'inlineResumeIcon', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
   return {
     wpm: result.wpm === undefined ? 500 : result.wpm,
     focusMode: result.focusMode === undefined ? true : result.focusMode,
     darkMode: result.darkMode === undefined ? false : result.darkMode,
     useWebpageFont: result.useWebpageFont === undefined ? false : result.useWebpageFont,
     scrollWithText: result.scrollWithText === undefined ? false : result.scrollWithText,
+    inlineResumeIcon: result.inlineResumeIcon === undefined ? false : result.inlineResumeIcon,
     pauseComma: result.pauseComma === undefined ? false : result.pauseComma,
     pauseSentence: result.pauseSentence === undefined ? false : result.pauseSentence,
     pauseParagraph: result.pauseParagraph === undefined ? false : result.pauseParagraph,
@@ -266,6 +327,8 @@ chrome.runtime.onMessage.addListener(async (message) => {
     updateOverlayFont(readerState.useWebpageFont);
   } else if (message.action === 'toggleScrollWithText') {
     readerState.scrollWithText = message.scrollWithText;
+  } else if (message.action === 'toggleInlineResumeIcon') {
+    readerState.inlineResumeIcon = message.inlineResumeIcon;
   } else if (message.action === 'togglePauseComma') {
     readerState.pauseComma = message.value;
   } else if (message.action === 'togglePauseSentence') {
@@ -344,6 +407,8 @@ function getSmartPageText() {
 
 
 function startReaderFromText(text, options, textStartIndex = 0) {
+  removeResumeIcons();
+
   if (readerState.isPlaying) {
     // If already playing, stop current reading first
     pauseReader();
@@ -354,6 +419,7 @@ function startReaderFromText(text, options, textStartIndex = 0) {
   readerState.darkMode = options.darkMode;
   readerState.useWebpageFont = options.useWebpageFont;
   readerState.scrollWithText = options.scrollWithText;
+  readerState.inlineResumeIcon = options.inlineResumeIcon;
   readerState.pauseComma = options.pauseComma;
   readerState.pauseSentence = options.pauseSentence;
   readerState.pauseParagraph = options.pauseParagraph;
