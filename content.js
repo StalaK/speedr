@@ -93,13 +93,16 @@ function stopReaderAndCleanUp() {
             
             const icon = document.createElement('span');
             icon.className = 'speedr-resume-icon';
-            icon.textContent = '▶';
             icon.title = 'Resume Speedr from here';
-            icon.style.cssText = 'color: #D4B996; background: #5B4636; border-radius: 3px; padding: 0 4px; margin: 0 2px; cursor: pointer; font-size: 0.9em; box-shadow: 0 1px 3px rgba(0,0,0,0.3);';
+            icon.style.cssText = 'display: inline-flex; align-items: center; justify-content: center; background: rgb(251, 240, 217); border-radius: 3px; padding: 0 2px; margin: 0 2px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3); vertical-align: middle;';
             if (readerState.darkMode) {
-              icon.style.color = '#5B4636';
               icon.style.background = '#D4B996';
             }
+            
+            const img = document.createElement('img');
+            img.src = readerState.darkMode ? chrome.runtime.getURL('icons/150-dark.svg') : chrome.runtime.getURL('icons/150-light.svg');
+            img.style.cssText = 'height: 1.2em; width: auto; vertical-align: middle;';
+            icon.appendChild(img);
             
             const parent = node.parentNode;
             
