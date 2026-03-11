@@ -7,6 +7,7 @@ let readerState = {
   focusMode: true,
   darkMode: false,
   useWebpageFont: false,
+  scrollWithText: false,
   pauseComma: false,
   pauseSentence: false,
   pauseParagraph: false,
@@ -17,6 +18,24 @@ let overlay = null;
 let wordDisplay = null;
 let focusOverlay = null;
 let progressBar = null;
+
+let targetScrollY = null;
+let isSmoothScrolling = false;
+
+function smoothScrollLoop() {
+  if (!readerState.isPlaying || !readerState.scrollWithText || targetScrollY === null) {
+    isSmoothScrolling = false;
+    return;
+  }
+  
+  const diff = targetScrollY - window.scrollY;
+  if (Math.abs(diff) > 1) {
+    window.scrollTo(0, window.scrollY + diff * 0.05);
+    requestAnimationFrame(smoothScrollLoop);
+  } else {
+    isSmoothScrolling = false;
+  }
+}
 
 // Initialize originalPageText and originalPageOffsets as soon as the content script loads
 const { root: smartRoot, isFallback } = getReadableRootElement();
@@ -40,6 +59,8 @@ function stopReaderAndCleanUp() {
   // Reset reader state
   readerState.words = [];
   readerState.currentIndex = 0;
+  targetScrollY = null;
+  isSmoothScrolling = false;
 
   // Send update to popup to show play icon
   chrome.runtime.sendMessage({ action: 'stateUpdate', isPlaying: false });
@@ -202,12 +223,13 @@ document.addEventListener('keydown', (event) => {
 });
 
 async function getStoredSettings() {
-  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
+  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'scrollWithText', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
   return {
     wpm: result.wpm === undefined ? 500 : result.wpm,
     focusMode: result.focusMode === undefined ? true : result.focusMode,
     darkMode: result.darkMode === undefined ? false : result.darkMode,
     useWebpageFont: result.useWebpageFont === undefined ? false : result.useWebpageFont,
+    scrollWithText: result.scrollWithText === undefined ? false : result.scrollWithText,
     pauseComma: result.pauseComma === undefined ? false : result.pauseComma,
     pauseSentence: result.pauseSentence === undefined ? false : result.pauseSentence,
     pauseParagraph: result.pauseParagraph === undefined ? false : result.pauseParagraph,
@@ -242,6 +264,8 @@ chrome.runtime.onMessage.addListener(async (message) => {
   } else if (message.action === 'toggleWebpageFont') {
     readerState.useWebpageFont = message.useWebpageFont;
     updateOverlayFont(readerState.useWebpageFont);
+  } else if (message.action === 'toggleScrollWithText') {
+    readerState.scrollWithText = message.scrollWithText;
   } else if (message.action === 'togglePauseComma') {
     readerState.pauseComma = message.value;
   } else if (message.action === 'togglePauseSentence') {
@@ -255,7 +279,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
       if (startIndex !== -1) {
         const settings = await getStoredSettings();
         const textToRead = readerState.originalPageText.substring(startIndex);
-        startReaderFromText(textToRead, settings);
+        startReaderFromText(textToRead, settings, startIndex);
       }
     }
   } else if (message.action === 'startReadToSelection') {
@@ -265,7 +289,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
       if (endIndex !== -1) {
         const settings = await getStoredSettings();
         const textToRead = readerState.originalPageText.substring(0, endIndex);
-        startReaderFromText(textToRead, settings);
+        startReaderFromText(textToRead, settings, 0);
       }
     }
   } else if (message.action === 'readSelection') {
@@ -285,7 +309,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
         
         const settings = await getStoredSettings();
         const textToRead = readerState.originalPageText.substring(expandedStart, expandedEnd);
-        startReaderFromText(textToRead, settings);
+        startReaderFromText(textToRead, settings, expandedStart);
       }
     }
   } else if (message.action === 'readWholePage') {
@@ -319,7 +343,7 @@ function getSmartPageText() {
 }
 
 
-function startReaderFromText(text, options) {
+function startReaderFromText(text, options, textStartIndex = 0) {
   if (readerState.isPlaying) {
     // If already playing, stop current reading first
     pauseReader();
@@ -329,11 +353,35 @@ function startReaderFromText(text, options) {
   readerState.wpm = options.wpm;
   readerState.darkMode = options.darkMode;
   readerState.useWebpageFont = options.useWebpageFont;
+  readerState.scrollWithText = options.scrollWithText;
   readerState.pauseComma = options.pauseComma;
   readerState.pauseSentence = options.pauseSentence;
   readerState.pauseParagraph = options.pauseParagraph;
 
-  readerState.words = text.replace(/\//g, ' / ').replace(/(\r\n|\n|\r){2,}/gm, " _PARAGRAPH_END_ ").split(/\s+/).filter(word => word.length > 0);
+  readerState.words = [];
+  const regex = /\S+/g;
+  let match;
+  let currentOffset = 0;
+  while ((match = regex.exec(text)) !== null) {
+    let word = match[0];
+    const precedingSpace = text.substring(currentOffset, match.index);
+    if (precedingSpace.match(/(\r\n|\n|\r){2,}/)) {
+      readerState.words.push({ word: '_PARAGRAPH_END_', globalOffset: textStartIndex + match.index });
+    }
+    
+    if (word.includes('/')) {
+      const parts = word.split('/');
+      for (let i = 0; i < parts.length; i++) {
+        if (parts[i].length > 0) {
+          readerState.words.push({ word: parts[i], globalOffset: textStartIndex + match.index });
+        }
+      }
+    } else {
+      readerState.words.push({ word: word, globalOffset: textStartIndex + match.index });
+    }
+    currentOffset = match.index + word.length;
+  }
+  
   readerState.currentIndex = 0;
 
   if (overlay) {
@@ -547,7 +595,9 @@ function showNextWord() {
     wordDisplay.classList.remove('expanded');
   }
 
-  const word = readerState.words[readerState.currentIndex];
+  const wordObj = readerState.words[readerState.currentIndex];
+  const word = typeof wordObj === 'object' ? wordObj.word : wordObj;
+  const globalOffset = typeof wordObj === 'object' ? wordObj.globalOffset : -1;
 
   if (word === '_PARAGRAPH_END_') {
     readerState.currentIndex++;
@@ -557,6 +607,33 @@ function showNextWord() {
     }
     readerState.timerId = setTimeout(showNextWord, delay);
     return;
+  }
+
+  // Handle scrolling
+  if (readerState.scrollWithText && globalOffset !== -1) {
+    for (const [node, {start, end}] of readerState.originalPageOffsets.entries()) {
+      if (globalOffset >= start && globalOffset < end) {
+        try {
+          const range = document.createRange();
+          const nodeStart = globalOffset - start;
+          const nodeEnd = Math.min(node.textContent.length, nodeStart + word.length);
+          range.setStart(node, nodeStart);
+          range.setEnd(node, nodeEnd);
+          const rect = range.getBoundingClientRect();
+          if (rect.top !== 0 || rect.bottom !== 0) {
+            const absoluteTop = window.scrollY + rect.top;
+            targetScrollY = absoluteTop - window.innerHeight / 2;
+            if (!isSmoothScrolling) {
+              isSmoothScrolling = true;
+              requestAnimationFrame(smoothScrollLoop);
+            }
+          }
+        } catch (e) {
+          console.error("Speedr scroll error:", e);
+        }
+        break;
+      }
+    }
   }
 
   // Highlight the middle letter

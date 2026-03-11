@@ -3,6 +3,7 @@ const wpmInput = document.getElementById('wpm-input');
 const focusModeCheckbox = document.getElementById('focus-mode-checkbox');
 const darkModeCheckbox = document.getElementById('dark-mode-checkbox');
 const webpageFontCheckbox = document.getElementById('webpage-font-checkbox');
+const scrollWithTextCheckbox = document.getElementById('scroll-with-text-checkbox');
 const pauseCommaCheckbox = document.getElementById('pause-comma-checkbox');
 const pauseSentenceCheckbox = document.getElementById('pause-sentence-checkbox');
 const pauseParagraphCheckbox = document.getElementById('pause-paragraph-checkbox');
@@ -11,11 +12,12 @@ const playPauseButton = document.getElementById('play-pause-button');
 document.addEventListener('DOMContentLoaded', restoreSettings);
 
 function restoreSettings() {
-  chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'pauseComma', 'pauseSentence', 'pauseParagraph'], (result) => {
+  chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'scrollWithText', 'pauseComma', 'pauseSentence', 'pauseParagraph'], (result) => {
     const storedWpm = result.wpm === undefined ? 500 : result.wpm; // Default 500
     const storedFocusMode = result.focusMode === undefined ? true : result.focusMode; // Default true
     const storedDarkMode = result.darkMode === undefined ? false : result.darkMode; // Default false
     const storedUseWebpageFont = result.useWebpageFont === undefined ? false : result.useWebpageFont; // Default false
+    const storedScrollWithText = result.scrollWithText === undefined ? false : result.scrollWithText; // Default false
     const storedPauseComma = result.pauseComma === undefined ? false : result.pauseComma; // Default false
     const storedPauseSentence = result.pauseSentence === undefined ? false : result.pauseSentence; // Default false
     const storedPauseParagraph = result.pauseParagraph === undefined ? false : result.pauseParagraph; // Default false
@@ -25,6 +27,7 @@ function restoreSettings() {
     focusModeCheckbox.checked = storedFocusMode;
     darkModeCheckbox.checked = storedDarkMode;
     webpageFontCheckbox.checked = storedUseWebpageFont;
+    scrollWithTextCheckbox.checked = storedScrollWithText;
     pauseCommaCheckbox.checked = storedPauseComma;
     pauseSentenceCheckbox.checked = storedPauseSentence;
     pauseParagraphCheckbox.checked = storedPauseParagraph;
@@ -71,6 +74,12 @@ webpageFontCheckbox.addEventListener('change', () => {
   const isChecked = webpageFontCheckbox.checked;
   sendMessage({ action: 'toggleWebpageFont', useWebpageFont: isChecked });
   chrome.storage.local.set({ useWebpageFont: isChecked }); // Save Use Webpage Font
+});
+
+scrollWithTextCheckbox.addEventListener('change', () => {
+  const isChecked = scrollWithTextCheckbox.checked;
+  sendMessage({ action: 'toggleScrollWithText', scrollWithText: isChecked });
+  chrome.storage.local.set({ scrollWithText: isChecked }); // Save Scroll With Text
 });
 
 pauseCommaCheckbox.addEventListener('change', () => {
