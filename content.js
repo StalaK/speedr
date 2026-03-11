@@ -69,7 +69,8 @@ function stopReaderAndCleanUp() {
   // Reset reader state
   const currentIndex = readerState.currentIndex;
   const totalWords = readerState.words.length;
-  const currentWordObj = readerState.words[currentIndex];
+  const targetIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+  const targetWordObj = readerState.words[targetIndex];
   const inlineResumeIcon = readerState.inlineResumeIcon;
 
   readerState.words = [];
@@ -79,8 +80,8 @@ function stopReaderAndCleanUp() {
 
   removeResumeIcons();
 
-  if (inlineResumeIcon && currentIndex > 0 && currentIndex < totalWords && currentWordObj) {
-    const globalOffset = typeof currentWordObj === 'object' ? currentWordObj.globalOffset : -1;
+  if (inlineResumeIcon && currentIndex > 0 && currentIndex < totalWords && targetWordObj) {
+    const globalOffset = typeof targetWordObj === 'object' ? targetWordObj.globalOffset : -1;
     if (globalOffset !== -1) {
       for (const [node, {start, end}] of readerState.originalPageOffsets.entries()) {
         if (globalOffset >= start && globalOffset < end) {
