@@ -6,6 +6,7 @@ let readerState = {
   timerId: null,
   focusMode: true,
   darkMode: false,
+  useWebpageFont: false,
   pauseComma: false,
   pauseSentence: false,
   pauseParagraph: false,
@@ -201,11 +202,12 @@ document.addEventListener('keydown', (event) => {
 });
 
 async function getStoredSettings() {
-  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
+  const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
   return {
     wpm: result.wpm === undefined ? 500 : result.wpm,
     focusMode: result.focusMode === undefined ? true : result.focusMode,
     darkMode: result.darkMode === undefined ? false : result.darkMode,
+    useWebpageFont: result.useWebpageFont === undefined ? false : result.useWebpageFont,
     pauseComma: result.pauseComma === undefined ? false : result.pauseComma,
     pauseSentence: result.pauseSentence === undefined ? false : result.pauseSentence,
     pauseParagraph: result.pauseParagraph === undefined ? false : result.pauseParagraph,
@@ -237,6 +239,9 @@ chrome.runtime.onMessage.addListener(async (message) => {
   } else if (message.action === 'toggleDarkMode') {
     readerState.darkMode = message.darkMode;
     updateOverlayTheme(readerState.darkMode);
+  } else if (message.action === 'toggleWebpageFont') {
+    readerState.useWebpageFont = message.useWebpageFont;
+    updateOverlayFont(readerState.useWebpageFont);
   } else if (message.action === 'togglePauseComma') {
     readerState.pauseComma = message.value;
   } else if (message.action === 'togglePauseSentence') {
@@ -303,6 +308,7 @@ function startReaderFromText(text, options) {
   readerState.focusMode = options.focusMode;
   readerState.wpm = options.wpm;
   readerState.darkMode = options.darkMode;
+  readerState.useWebpageFont = options.useWebpageFont;
   readerState.pauseComma = options.pauseComma;
   readerState.pauseSentence = options.pauseSentence;
   readerState.pauseParagraph = options.pauseParagraph;
@@ -318,6 +324,7 @@ function startReaderFromText(text, options) {
       toggleFocusOverlay(true);
     }
     updateOverlayTheme(readerState.darkMode);
+    updateOverlayFont(readerState.useWebpageFont);
   } else {
     // If overlay doesn't exist, create it
     createOverlay();
@@ -389,6 +396,16 @@ function updateOverlayTheme(isDark) {
   }
 }
 
+function updateOverlayFont(useWebpageFont) {
+  if (overlay) {
+    if (useWebpageFont) {
+      overlay.classList.add('use-webpage-font');
+    } else {
+      overlay.classList.remove('use-webpage-font');
+    }
+  }
+}
+
 function createOverlay() {
   if (readerState.focusMode) {
     toggleFocusOverlay(true);
@@ -398,6 +415,9 @@ function createOverlay() {
   overlay.id = 'word-reader-overlay';
   if (readerState.darkMode) {
     overlay.classList.add('dark-mode');
+  }
+  if (readerState.useWebpageFont) {
+    overlay.classList.add('use-webpage-font');
   }
   
   wordDisplay = document.createElement('div');
@@ -444,8 +464,11 @@ function createOverlay() {
       background-color: rgba(51, 51, 51, 0.95);
       color: #E0E0E0;
     }
+    #word-reader-overlay.use-webpage-font #word-reader-display {
+      font-family: inherit !important;
+    }
     #word-reader-display {
-      font-family: 'Courier New', monospace;
+      font-family: initial !important;
       font-size: 3em;
       margin-bottom: 10px;
       width: 800px;
