@@ -94,14 +94,14 @@ function stopReaderAndCleanUp() {
             const icon = document.createElement('span');
             icon.className = 'speedr-resume-icon';
             icon.title = 'Resume Speedr from here';
-            icon.style.cssText = 'display: inline-flex; align-items: center; justify-content: center; background: rgb(251, 240, 217); border-radius: 3px; padding: 0 2px; margin: 0 2px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3); vertical-align: middle;';
+            icon.style.cssText = 'display: inline-flex; align-items: center; justify-content: center; background: rgb(251, 240, 217); border-radius: 3px; padding: 2px !important; margin: 0 4px !important; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3); vertical-align: middle; line-height: 0 !important; box-sizing: content-box !important; height: 1.2em !important; width: 1.2em !important;';
             if (readerState.darkMode) {
               icon.style.background = '#D4B996';
             }
             
             const img = document.createElement('img');
             img.src = readerState.darkMode ? chrome.runtime.getURL('icons/150-dark.svg') : chrome.runtime.getURL('icons/150-light.svg');
-            img.style.cssText = 'height: 1.2em; width: auto; vertical-align: middle;';
+            img.style.cssText = 'height: 100% !important; width: 100% !important; display: block !important; margin: 0 !important; padding: 0 !important; border: none !important; box-sizing: border-box !important; object-fit: contain !important;';
             icon.appendChild(img);
             
             const parent = node.parentNode;
