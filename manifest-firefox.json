@@ -38,6 +38,10 @@
     "48": "icons/48.svg",
     "96": "icons/96.svg"
   },
+  "web_accessible_resources": [
+    "icons/150-dark.svg",
+    "icons/150-light.svg"
+  ],
   "commands": {
     "read-whole-page": {
       "suggested_key": {

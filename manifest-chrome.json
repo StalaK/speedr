@@ -33,6 +33,17 @@
     "48": "icons/48.png",
     "96": "icons/96.png"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/150-dark.svg",
+        "icons/150-light.svg"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
   "commands": {
     "read-whole-page": {
       "suggested_key": {
