@@ -384,7 +384,7 @@ function showWordAtIndex(index) {
 
   // Update progress bar
   if (progressBar) {
-    const progress = (index / readerState.words.length) * 100;
+    const progress = readerState.words.length > 1 ? (index / (readerState.words.length - 1)) * 100 : 100;
     progressBar.style.width = `${progress}%`;
   }
 }
@@ -843,7 +843,7 @@ function showNextWord() {
 
   // Update progress bar
   if (progressBar) {
-    const progress = (readerState.currentIndex / readerState.words.length) * 100;
+    const progress = readerState.words.length > 1 ? (readerState.currentIndex / (readerState.words.length - 1)) * 100 : 100;
     progressBar.style.width = `${progress}%`;
   }
 
