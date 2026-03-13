@@ -295,26 +295,44 @@ document.addEventListener('keydown', (event) => {
 });
 
 function seekForward() {
-  if (readerState.currentIndex < readerState.words.length) {
-    // If we're paused, we just want to advance and show the word immediately
-    // If the *current* word is shown and we want to go forward, 
-    // the index is already ahead (since showNextWord increments it).
-    // So if we just want to show the next word manually:
-    showWordAtIndex(readerState.currentIndex);
+  while (readerState.currentIndex < readerState.words.length) {
+    const wordObj = readerState.words[readerState.currentIndex];
+    const word = typeof wordObj === 'object' ? wordObj.word : wordObj;
+    
+    if (word !== '_PARAGRAPH_END_') {
+      showWordAtIndex(readerState.currentIndex);
+      readerState.currentIndex++;
+      break;
+    }
     readerState.currentIndex++;
   }
 }
 
 function seekBackward() {
-  if (readerState.currentIndex > 1) {
-    // If current index is at the next word, we need to go back 2 steps to see the previous word
-    readerState.currentIndex -= 2;
-    showWordAtIndex(readerState.currentIndex);
-    readerState.currentIndex++;
-  } else if (readerState.currentIndex === 1) {
-     readerState.currentIndex = 0;
-     showWordAtIndex(readerState.currentIndex);
-     readerState.currentIndex++;
+  let targetIndex = readerState.currentIndex - 2;
+  if (targetIndex < 0) {
+      targetIndex = 0;
+  }
+  
+  while (targetIndex >= 0) {
+    const wordObj = readerState.words[targetIndex];
+    const word = typeof wordObj === 'object' ? wordObj.word : wordObj;
+    if (word !== '_PARAGRAPH_END_') {
+      showWordAtIndex(targetIndex);
+      readerState.currentIndex = targetIndex + 1;
+      return;
+    }
+    targetIndex--;
+  }
+
+  // If we reach here, we might be at the very beginning
+  if (readerState.words.length > 0) {
+      const firstWordObj = readerState.words[0];
+      const firstWord = typeof firstWordObj === 'object' ? firstWordObj.word : firstWordObj;
+      if (firstWord !== '_PARAGRAPH_END_') {
+          showWordAtIndex(0);
+          readerState.currentIndex = 1;
+      }
   }
 }
 
@@ -327,19 +345,9 @@ function showWordAtIndex(index) {
 
   const wordObj = readerState.words[index];
   const word = typeof wordObj === 'object' ? wordObj.word : wordObj;
-  const globalOffset = typeof wordObj === 'object' ? wordObj.globalOffset : -1;
 
   if (word === '_PARAGRAPH_END_') {
-    // Skip paragraph ends when seeking
-    if (event.key === 'ArrowLeft' && index > 0) {
-        readerState.currentIndex--;
-        seekBackward();
-    } else if (event.key === 'ArrowRight' && index < readerState.words.length - 1) {
-        readerState.currentIndex++;
-        seekForward();
-    } else {
-        wordDisplay.textContent = '';
-    }
+    wordDisplay.textContent = '';
     return;
   }
 
