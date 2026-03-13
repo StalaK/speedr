@@ -283,8 +283,103 @@ document.addEventListener('keydown', (event) => {
     } else {
       resumeReader();
     }
+  } else if (!readerState.isPlaying && readerState.words.length > 0 && overlay && overlay.style.display !== 'none') {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      seekForward();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      seekBackward();
+    }
   }
 });
+
+function seekForward() {
+  if (readerState.currentIndex < readerState.words.length) {
+    // If we're paused, we just want to advance and show the word immediately
+    // If the *current* word is shown and we want to go forward, 
+    // the index is already ahead (since showNextWord increments it).
+    // So if we just want to show the next word manually:
+    showWordAtIndex(readerState.currentIndex);
+    readerState.currentIndex++;
+  }
+}
+
+function seekBackward() {
+  if (readerState.currentIndex > 1) {
+    // If current index is at the next word, we need to go back 2 steps to see the previous word
+    readerState.currentIndex -= 2;
+    showWordAtIndex(readerState.currentIndex);
+    readerState.currentIndex++;
+  } else if (readerState.currentIndex === 1) {
+     readerState.currentIndex = 0;
+     showWordAtIndex(readerState.currentIndex);
+     readerState.currentIndex++;
+  }
+}
+
+function showWordAtIndex(index) {
+  if (index < 0 || index >= readerState.words.length) return;
+
+  if (wordDisplay.classList.contains('expanded')) {
+    wordDisplay.classList.remove('expanded');
+  }
+
+  const wordObj = readerState.words[index];
+  const word = typeof wordObj === 'object' ? wordObj.word : wordObj;
+  const globalOffset = typeof wordObj === 'object' ? wordObj.globalOffset : -1;
+
+  if (word === '_PARAGRAPH_END_') {
+    // Skip paragraph ends when seeking
+    if (event.key === 'ArrowLeft' && index > 0) {
+        readerState.currentIndex--;
+        seekBackward();
+    } else if (event.key === 'ArrowRight' && index < readerState.words.length - 1) {
+        readerState.currentIndex++;
+        seekForward();
+    } else {
+        wordDisplay.textContent = '';
+    }
+    return;
+  }
+
+  // Highlight the middle letter
+  const wordLength = word.length;
+  let middleIndex = Math.floor(wordLength / 2);
+  if (wordLength % 2 === 0 && middleIndex > 0) { // For even length, pick the one closer to beginning
+    middleIndex--;
+  }
+
+  const beforeMiddle = word.substring(0, middleIndex);
+  const middleLetter = word.charAt(middleIndex);
+  const afterMiddle = word.substring(middleIndex + 1);
+
+  wordDisplay.textContent = ''; // Clear previous content
+
+  // Create text node for beforeMiddle
+  const beforeSpan = document.createTextNode(beforeMiddle);
+  wordDisplay.appendChild(beforeSpan);
+
+  // Create span for middleLetter
+  const middleSpan = document.createElement('span');
+  middleSpan.style.color = '#5A7D9A';
+  middleSpan.textContent = middleLetter;
+  wordDisplay.appendChild(middleSpan);
+
+  // Create text node for afterMiddle
+  const afterSpan = document.createTextNode(afterMiddle);
+  wordDisplay.appendChild(afterSpan);
+  
+  if (wordDisplay.scrollWidth > wordDisplay.clientWidth) {
+    wordDisplay.classList.add('expanded');
+  }
+
+  // Update progress bar
+  if (progressBar) {
+    const progress = (index / readerState.words.length) * 100;
+    progressBar.style.width = `${progress}%`;
+  }
+}
 
 async function getStoredSettings() {
   const result = await chrome.storage.local.get(['wpm', 'focusMode', 'darkMode', 'useWebpageFont', 'scrollWithText', 'inlineResumeIcon', 'pauseComma', 'pauseSentence', 'pauseParagraph']);
@@ -675,6 +770,7 @@ function showNextWord() {
     if (readerState.pauseParagraph) {
       delay *= 1.75; // 1.75x delay for paragraph
     }
+    wordDisplay.textContent = ''; // Clear display during paragraph pause
     readerState.timerId = setTimeout(showNextWord, delay);
     return;
   }
